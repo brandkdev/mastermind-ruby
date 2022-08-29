@@ -31,14 +31,20 @@ class Computer
 
   def check_guess
     @display = Display.new(@guess)
-    @guess.each_with_index do |guess_part, index|
-      if guess_part == @code_array[index]
+    @already_checked = []
+    i = 0
+    while i < 4
+      if @guess[i] == @code_array[i]
         @display.hint('X')
-      elsif guess_part == @code_array.any?
+      elsif @code_array.any? { |val| val == @guess[i] } && @already_checked.none? { |val| val == @guess[i] }
         @display.hint('O')
-      else next
+        @already_checked.push(@guess[i])
+      else @display.hint(' ')
       end
+      i += 1
     end
+    @display.show_guess_hint
+    @human.enter_guess(@computer)
   end
 end
 
@@ -50,8 +56,8 @@ class Display
 
   def hint(str = '')
     @hint_array.push(str)
+    @hint_array.sort!
     @hint = @hint_array.join
-    show_guess_hint
   end
 
   def show_guess_hint
