@@ -16,7 +16,6 @@ class Computer
     @computer = computer
     @code_array = [(1 + rand(6)), (1 + rand(6)), (1 + rand(6)), (1 + rand(6))]
     @code = @code_array.join
-    puts @code
     @human.enter_guess(@computer)
   end
 
@@ -97,10 +96,8 @@ class Game
 
   def choice
     if @player_choice == 1
-      puts 'made it first'
       @computer.make_code(@human, @computer)
     elsif @player_choice == 2
-      puts 'made it seconde'
       @human.make_code
       @computer.guess_code
     elsif @player_choice != (1 || 2)
