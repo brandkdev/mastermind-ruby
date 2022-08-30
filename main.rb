@@ -9,81 +9,10 @@
 #    and a white peg if only the color is correct. 
 
 # The computer can be either a code breaker, or code maker.
-class Computer
-
-  def make_code(human, computer)
-    @human = human
-    @computer = computer
-    @code_array = [(1 + rand(6)), (1 + rand(6)), (1 + rand(6)), (1 + rand(6))]
-    @code = @code_array.join
-    @human.enter_guess(@computer)
-  end
-
-  def check_if_win(players_guess)
-    @guess_array = players_guess.to_s.split('')
-    @guess = @guess_array.map { |val| val.to_i }
-    if @guess == @code_array
-      puts 'Human wins.'
-    else check_guess
-    end
-  end
-
-  def check_guess
-    @display = Display.new(@guess)
-    @already_checked = []
-    i = 0
-    while i < 4
-      if @guess[i] == @code_array[i]
-        @display.hint('X')
-      elsif @code_array.any? { |val| val == @guess[i] } && @already_checked.none? { |val| val == @guess[i] }
-        @display.hint('O')
-        @already_checked.push(@guess[i])
-      else @display.hint(' ')
-      end
-      i += 1
-    end
-    @display.show_guess_hint
-    @human.enter_guess(@computer)
-  end
-end
-
-class Display
-  def initialize(players_guess)
-    @players_guess = players_guess
-    @hint_array = []
-  end
-
-  def hint(str = '')
-    @hint_array.push(str)
-    @hint_array.sort!
-    @hint = @hint_array.join
-  end
-
-  def show_guess_hint
-    puts "#{@players_guess}       #{@hint}"
-  end
-end
-
-class Human
-
-  def enter_guess(computer)
-    @computer = computer
-    puts "Enter 4 digits for your guess."
-    @guess = gets.chomp.to_i
-    if @guess.to_s.length != 4
-      puts "Your guess must be 4 digits long."
-      enter_guess(@computer)
-    end
-    @computer.check_if_win(@guess)
-  end
-end
-
 class Game
   attr_reader :human, :computer
-  attr_accessor :turns
 
   def initialize
-    @turns = 0
     @human = Human.new
     @computer = Computer.new
   end
@@ -107,5 +36,102 @@ class Game
   end
 end
 
-new_game = Game.new
-new_game.start
+class Computer
+
+  def make_code(human, computer)
+    @human = human
+    @computer = computer
+    @code_array = [(1 + rand(6)), (1 + rand(6)), (1 + rand(6)), (1 + rand(6))]
+    @code = @code_array.join
+    puts @code
+    @human.enter_guess(@computer)
+  end
+
+  def check_if_win(players_guess)
+    @guess_array = players_guess.to_s.split('')
+    @guess = @guess_array.map { |val| val.to_i }
+    if @guess == @code_array
+      puts 'Human wins.'
+      @human.play_again?
+    else check_guess
+    end
+  end
+
+  def check_guess
+    @display = Display.new(@guess, @human)
+    @already_checked = []
+    i = 0
+    while i < 4
+      if @guess[i] == @code_array[i]
+        @display.hint('X')
+        @already_checked.push(@guess[i])
+      elsif @code_array.any? { |val| val == @guess[i] } && @already_checked.none? { |val| val == @guess[i] }
+        @display.hint('O')
+        @already_checked.push(@guess[i])
+      else @display.hint(' ')
+      end
+      i += 1
+    end
+    @display.show_guess_hint
+    @human.enter_guess(@computer)
+  end
+end
+
+class Display
+  def initialize(players_guess, human)
+    @players_guess = players_guess
+    @hint_array = []
+    @human = human
+  end
+
+  def hint(str = '')
+    @hint_array.push(str)
+    @hint_array.sort!.reverse!
+    @hint = @hint_array.join
+  end
+
+  def show_guess_hint
+    puts "#{@players_guess}       #{@hint}      Turn #{@human.turns}/12"
+  end
+end
+
+class Logic
+  
+  def initialize(human)
+    @human = human
+  end
+end
+
+class Human
+
+  attr_reader :turns
+
+  def initialize
+    @turns = 0
+  end
+
+  def enter_guess(computer)
+    @computer = computer
+    puts "Enter 4 digits for your guess."
+    @guess = gets.chomp.to_i
+    if @guess.to_s.length != 4
+      puts "Your guess must be 4 digits long."
+      enter_guess(@computer)
+    end
+    @turns += 1
+    check_turns
+  end
+
+  def check_turns
+    puts "made it"
+    @turns == 12 ? play_again? : @computer.check_if_win(@guess)
+  end
+
+  def play_again?
+    puts "Would you like to play again? Enter 'y' for yes, and any other key for no."
+    @response = gets.chomp
+    @response == 'y' ? Game.new.start : exit(true)
+  end
+end
+
+Game.new.start
