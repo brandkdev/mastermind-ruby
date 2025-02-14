@@ -43,7 +43,6 @@ class Computer
     @computer = computer
     @code_array = [(1 + rand(6)), (1 + rand(6)), (1 + rand(6)), (1 + rand(6))]
     @code = @code_array.join
-    puts @code
     @human.enter_guess(@computer)
   end
 
@@ -123,7 +122,6 @@ class Human
   end
 
   def check_turns
-    puts "made it"
     @turns == 12 ? play_again? : @computer.check_if_win(@guess)
   end
 
